@@ -1,3 +1,3 @@
 # mini-chat
 
-Chat application built with FastAPI and WebSockets.
+Chat application built with Starlette and WebSockets.
