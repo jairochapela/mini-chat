@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Mini Chat - Starlette</title>
+	<style>
+		:root {
+			--bg: #f4f7fb;
+			--surface: #ffffff;
+			--ink: #1f2a37;
+			--muted: #5b6470;
+			--accent: #1e6fd9;
+			--accent-soft: #e8f1ff;
+			--border: #d8e1ec;
+		}
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			font-family: "Avenir Next", "Segoe UI", sans-serif;
+			color: var(--ink);
+			background:
+				radial-gradient(circle at 15% 10%, #ffffff 0%, transparent 35%),
+				radial-gradient(circle at 85% 90%, #eaf2ff 0%, transparent 30%),
+				var(--bg);
+			min-height: 100vh;
+			display: grid;
+			place-items: center;
+			padding: 16px;
+		}
+		.card {
+			width: min(760px, 100%);
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			box-shadow: 0 12px 32px rgba(31, 42, 55, 0.08);
+			overflow: hidden;
+		}
+		.header {
+			padding: 16px 18px;
+			background: linear-gradient(120deg, #f7fbff, #eef5ff);
+			border-bottom: 1px solid var(--border);
+		}
+		.header h1 {
+			margin: 0;
+			font-size: 1.1rem;
+			letter-spacing: 0.2px;
+		}
+		.header p {
+			margin: 6px 0 0;
+			color: var(--muted);
+			font-size: 0.92rem;
+		}
+		#log {
+			height: 320px;
+			overflow: auto;
+			padding: 12px;
+			display: grid;
+			gap: 8px;
+			background: #fcfdff;
+		}
+		.line {
+			font-family: "SF Mono", "Menlo", monospace;
+			font-size: 0.9rem;
+			background: #ffffff;
+			border: 1px solid #e6edf5;
+			border-radius: 10px;
+			padding: 8px 10px;
+			word-break: break-word;
+		}
+		.controls {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 10px;
+			padding: 12px;
+			border-top: 1px solid var(--border);
+			background: #ffffff;
+		}
+		input, button {
+			height: 42px;
+			border-radius: 10px;
+			border: 1px solid var(--border);
+			font-size: 0.95rem;
+		}
+		input {
+			width: 100%;
+			padding: 0 12px;
+			outline: none;
+		}
+		input:focus {
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px var(--accent-soft);
+		}
+		button {
+			min-width: 110px;
+			border-color: transparent;
+			background: var(--accent);
+			color: #fff;
+			cursor: pointer;
+			font-weight: 600;
+		}
+		button:hover { filter: brightness(1.05); }
+		.status {
+			padding: 0 12px 12px;
+			color: var(--muted);
+			font-size: 0.85rem;
+		}
+	</style>
+</head>
+<body>
+	<section class="card">
+		<div class="header">
+			<h1>Mini Chat didactico (Starlette + WebSocket)</h1>
+			<p>Abre esta pagina en dos pestanas para ver el broadcast en accion.</p>
+		</div>
+
+		<div id="log" aria-live="polite"></div>
+
+		<form id="chat-form" class="controls">
+			<input id="message-input" placeholder="Escribe un mensaje y pulsa Enter" autocomplete="off" />
+			<button type="submit">Enviar</button>
+		</form>
+
+		<div class="status" id="status">Estado: conectando...</div>
+	</section>
+
+	<script>
+        // Identidad del usuario
+        const username = prompt("Nombre de usuario")
+        const uuid_client = crypto.randomUUID()
+
+		// Construimos la URL WebSocket segun el protocolo de la pagina actual.
+		// Si la pagina va por https, el socket debe ir por wss.
+		const scheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const querystring = `username=${encodeURIComponent(username)}&id=${uuid_client}`;
+		const wsUrl = `${scheme}://${window.location.host}/ws?${querystring}`;
+
+		const socket = new WebSocket(wsUrl);
+		const log = document.getElementById("log");
+		const form = document.getElementById("chat-form");
+		const input = document.getElementById("message-input");
+		const status = document.getElementById("status");
+
+		function addLine(text) {
+			const div = document.createElement("div");
+			div.className = "line";
+			div.textContent = text;
+			log.appendChild(div);
+			log.scrollTop = log.scrollHeight;
+		}
+
+		socket.addEventListener("open", () => {
+			status.textContent = "Estado: conectado";
+			addLine("[sistema] Conexion WebSocket abierta");
+		});
+
+		socket.addEventListener("message", (event) => {
+			addLine(event.data);
+		});
+
+		socket.addEventListener("close", () => {
+			status.textContent = "Estado: desconectado";
+			addLine("[sistema] Conexion WebSocket cerrada");
+		});
+
+		socket.addEventListener("error", () => {
+			status.textContent = "Estado: error de conexion";
+			addLine("[sistema] Error en WebSocket");
+		});
+
+		form.addEventListener("submit", (event) => {
+			event.preventDefault();
+
+			const message = input.value.trim();
+			if (!message) return;
+
+			// Enviamos texto plano; en una app real podrias usar JSON.
+			socket.send(message);
+			input.value = "";
+			input.focus();
+		});
+	</script>
+</body>
+</html>
