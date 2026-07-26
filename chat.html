@@ -11,8 +11,13 @@
 			--ink: #1f2a37;
 			--muted: #5b6470;
 			--accent: #1e6fd9;
-			--accent-soft: #e8f1ff;
+			--accent-soft: color-mix(in srgb, var(--accent) 14%, white);
 			--border: #d8e1ec;
+			--base-soft: color-mix(in srgb, var(--muted) 10%, white);
+			--base-soft-border: color-mix(in srgb, var(--muted) 28%, white);
+			--base-soft-ink: color-mix(in srgb, var(--muted) 72%, black);
+			--muted-soft: color-mix(in srgb, var(--muted) 16%, white);
+			--muted-soft-border: color-mix(in srgb, var(--muted) 34%, white);
 			--shell-gap: 16px;
 			--header-h: 72px;
 			--form-h: 76px;
@@ -88,23 +93,23 @@
 			line-height: 1.35;
 		}
 		.line.user {
-			background: #eef5ff;
-			border: 1px solid #cfe0ff;
+			background: var(--base-soft);
+			border: 1px solid var(--base-soft-border);
 			border-radius: 16px 16px 16px 5px;
-			color: #1b355b;
+			color: var(--base-soft-ink);
 		}
 		.line.me {
-			background: #dcecff;
-			border: 1px solid #b6d3ff;
+			background: var(--accent-soft);
+			border: 1px solid color-mix(in srgb, var(--accent) 40%, white);
 			border-radius: 16px 16px 5px 16px;
-			color: #12345f;
+			color: color-mix(in srgb, var(--accent) 64%, black);
 			margin-left: auto;
 		}
 		.line.system {
-			background: #eef1f4;
-			border: 1px solid #d9dfe6;
-			border-radius: 10px;
-			color: #4f5b67;
+			/*background: var(--muted-soft);
+			border: 1px solid var(--muted-soft-border);
+			border-radius: 10px;*/
+			color: var(--muted);
 			width: 100%;
 			max-width: 100%;
 			text-align: center;
@@ -125,12 +130,12 @@
 		}
 		.line.user .username {
 			/* background: #dceaff; */
-			color: #1a4d96;
+			color: color-mix(in srgb, var(--muted) 80%, black);
 			/* border: 1px solid #bfd7ff; */
 		}
 		.line.me .username {
 			/* background: #cbe1ff; */
-			color: #123e7a;
+			color: color-mix(in srgb, var(--accent) 75%, black);
 			/* border: 1px solid #accbff; */
 		}
 		#chat-form.controls {
@@ -217,6 +222,15 @@
 		const input = document.getElementById("message-input");
 		const status = document.getElementById("status");
 
+		function colorFromUsername(username) {
+			let hash = 0;
+			for (let i = 0; i < username.length; i++) {
+				hash = username.charCodeAt(i) + ((hash << 5) - hash);
+			}
+			const hue = hash % 360;
+			return `hsl(${hue}, 30%, 50%)`;
+		}
+
 		function addLine(msgtype, username, text) {
 			const div = document.createElement("div");
 			div.className = "line " + msgtype;
@@ -226,6 +240,7 @@
 			} else {
 				const spanUserText = document.createElement("span");
 				spanUserText.className = "username";
+				spanUserText.style.color = colorFromUsername(username);
 				spanUserText.textContent = username;
 
 				const messageText = document.createElement("span");
