@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 from typing import Set
+from pathlib import Path
 
 from starlette.applications import Starlette
 from starlette.endpoints import WebSocketEndpoint
@@ -77,7 +78,8 @@ async def homepage(_: Request) -> HTMLResponse:
 
     La ruta HTTP sirve la interfaz y el script JS abre el WebSocket a /ws.
     """
-    with open('chat.html', 'r') as file:
+    template_path = Path(__file__).parent / 'templates' / 'index.html'
+    with open(template_path, 'r') as file:
         html_content = file.read()
 
     return HTMLResponse(html_content)
