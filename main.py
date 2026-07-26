@@ -123,7 +123,12 @@ class ChatWebSocketEndpoint(WebSocketEndpoint):
         if not message:
                 return
 
-        await manager.broadcast(json.dumps({"type": "user", "username": self.username, "message": message}))
+        await manager.broadcast(
+            json.dumps({
+                "type": "user", 
+                "username": self.username, 
+                "message": message
+            }))
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
         """
