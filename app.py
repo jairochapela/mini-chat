@@ -20,6 +20,7 @@ Luego abrir:
 
 from __future__ import annotations
 
+import json
 from typing import Set
 
 from starlette.applications import Starlette
@@ -104,7 +105,7 @@ class ChatWebSocketEndpoint(WebSocketEndpoint):
             querystring = websocket.query_params
             self.username = querystring.get("username", "Anónimo")
             self.id = querystring.get("id", "unknown")
-            await manager.broadcast(f"[sistema] El usuario {self.username} se ha conectado ({self.id})")
+            await manager.broadcast(json.dumps({"type": "system", "message": f"Un usuario se ha conectado: {self.username}"}))
 
     async def on_receive(self, websocket: WebSocket, data: str) -> None:
             """
@@ -119,7 +120,7 @@ class ChatWebSocketEndpoint(WebSocketEndpoint):
             if not message:
                     return
 
-            await manager.broadcast(f"[{self.username}] {message}")
+            await manager.broadcast(json.dumps({"type": "user", "username": self.username, "message": message}))
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
             """
@@ -129,7 +130,7 @@ class ChatWebSocketEndpoint(WebSocketEndpoint):
             Aqui no lo usamos para logica, pero lo dejamos en firma para estudio.
             """
             manager.disconnect(websocket)
-            await manager.broadcast(f"[sistema] El usuario {self.username} se ha desconectado ({self.id})")
+            await manager.broadcast(json.dumps({"type": "system", "message": f"El usuario {self.username} se ha desconectado ({self.id})"}))
 
 
 # Tabla de rutas de la aplicacion.

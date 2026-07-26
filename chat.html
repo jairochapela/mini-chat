@@ -141,31 +141,37 @@
 		const input = document.getElementById("message-input");
 		const status = document.getElementById("status");
 
-		function addLine(text) {
+		function addLine(msgtype, username, text) {
 			const div = document.createElement("div");
-			div.className = "line";
-			div.textContent = text;
+			div.className = "line " + msgtype;
+			div.textContent = `[${username}] ${text}`;
 			log.appendChild(div);
 			log.scrollTop = log.scrollHeight;
 		}
 
 		socket.addEventListener("open", () => {
 			status.textContent = "Estado: conectado";
-			addLine("[sistema] Conexion WebSocket abierta");
+			addLine('system', null, "Conexion WebSocket abierta");
 		});
 
 		socket.addEventListener("message", (event) => {
-			addLine(event.data);
+            data = JSON.parse(event.data);
+            console.log(data, username, data.username, username==data.username);
+            if (data.username == username) {
+                addLine('me', username, data.message);
+            } else {
+			    addLine('user', data.username, data.message);
+            }
 		});
 
 		socket.addEventListener("close", () => {
 			status.textContent = "Estado: desconectado";
-			addLine("[sistema] Conexion WebSocket cerrada");
+			addLine('system', null, "Conexion WebSocket cerrada");
 		});
 
 		socket.addEventListener("error", () => {
 			status.textContent = "Estado: error de conexion";
-			addLine("[sistema] Error en WebSocket");
+			addLine('system', null, "Error en WebSocket");
 		});
 
 		form.addEventListener("submit", (event) => {
