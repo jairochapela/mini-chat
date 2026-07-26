@@ -60,14 +60,15 @@
 			background: #fcfdff;
 		}
 		.line {
-			font-family: "SF Mono", "Menlo", monospace;
+			font-family:Arial, Helvetica, sans-serif;
 			font-size: 0.9rem;
 			padding: 10px 12px;
+			min-height: 0;
 			word-break: break-word;
 			width: fit-content;
 			max-width: min(78%, 560px);
 			justify-self: start;
-			line-height: 1.35;
+			/* line-height: 1.35; */
 		}
 		.line.user {
 			background: #eef5ff;
@@ -91,6 +92,34 @@
 			max-width: 100%;
 			justify-self: stretch;
 			text-align: center;
+		}
+		.line .username {
+			display: inline-block;
+			font-size: 0.78rem;
+			font-weight: 700;
+			letter-spacing: 0.02em;
+			margin-right: 8px;
+			padding: 2px 7px;
+			border-radius: 999px;
+			vertical-align: middle;
+		}
+		.line .username::before {
+			content: "[";
+			margin-right: 1px;
+		}
+		.line .username::after {
+			content: "]";
+			margin-left: 1px;
+		}
+		.line.user .username {
+			background: #dceaff;
+			color: #1a4d96;
+			border: 1px solid #bfd7ff;
+		}
+		.line.me .username {
+			background: #cbe1ff;
+			color: #123e7a;
+			border: 1px solid #accbff;
 		}
 		.controls {
 			display: grid;
@@ -149,7 +178,9 @@
 	</section>
 
 	<script>
-        // Identidad del usuario
+        // Identidad del usuario: comprobación de cookie
+        
+
         const username = prompt("Nombre de usuario")
         const uuid_client = crypto.randomUUID()
 
@@ -172,7 +203,15 @@
 			if (msgtype === "system") {
 				div.textContent = text;
 			} else {
-				div.textContent = `[${username}] ${text}`;
+				const spanUserText = document.createElement("span");
+				spanUserText.className = "username";
+				spanUserText.textContent = username;
+
+				const messageText = document.createElement("span");
+				messageText.textContent = text;
+
+				div.appendChild(spanUserText);
+				div.appendChild(messageText);
 			}
 
 			log.appendChild(div);
@@ -187,7 +226,9 @@
 		socket.addEventListener("message", (event) => {
             data = JSON.parse(event.data);
             console.log(data, username, data.username, username==data.username);
-            if (data.username == username) {
+            if (data.type == 'system') {
+                addLine('system', null, data.message);
+            } else if (data.username == username) {
                 addLine('me', username, data.message);
             } else {
 			    addLine('user', data.username, data.message);
