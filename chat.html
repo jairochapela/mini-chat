@@ -10,6 +10,15 @@
 	<section class="card">
 		<div class="header">
 			<h1>Mini Chat</h1>
+			<div class="identity-summary">
+				<span id="current-username-label">Usuario: sin definir</span>
+				<button type="button" id="toggle-identity-btn" class="small-button outline-button">Establecer usuario</button>
+			</div>
+			<form id="identity-form" class="identity-controls">
+				<input id="username-input" placeholder="Tu nombre de usuario" autocomplete="off" />
+				<button type="submit">Guardar</button>
+				<button type="button" id="cancel-identity-btn" class="secondary-button">Cancelar</button>
+			</form>
 		</div>
 
 		<div id="log" aria-live="polite"></div>
@@ -21,6 +30,7 @@
 
 		<div class="status" id="status">Estado: conectando...</div>
 	</section>
+	<div class="modal-overlay" id="modal-overlay"></div>
 
 	<script src="/static/chat.js"></script>
 </body>
